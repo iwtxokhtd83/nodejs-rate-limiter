@@ -1,0 +1,51 @@
+{
+  "name": "nodejs-rate-limiter",
+  "version": "1.0.0",
+  "description": "High-performance rate limiter for Node.js with Token Bucket, Sliding Window, Redis support, and distributed rate limiting",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "benchmark": "tsx benchmark/run.ts",
+    "benchmark:compare": "tsx benchmark/compare.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "rate-limiter",
+    "rate-limiting",
+    "token-bucket",
+    "sliding-window",
+    "redis",
+    "distributed",
+    "middleware",
+    "express",
+    "throttle",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "ioredis": "^5.3.2",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  },
+  "peerDependencies": {
+    "ioredis": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ioredis": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
