@@ -281,7 +281,7 @@ npx tsx examples/basic-usage.ts
 Contributions are welcome. Please open an issue first to discuss what you'd like to change.
 
 ```bash
-git clone https://github.com/your-username/nodejs-rate-limiter.git
+git clone https://github.com/iwtxokhtd83/nodejs-rate-limiter.git
 cd nodejs-rate-limiter
 npm install
 npm test
