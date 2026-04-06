@@ -1,6 +1,6 @@
 # Algorithms
 
-nodejs-rate-limiter ships with two rate limiting algorithms. Both run in O(1) time and space per key.
+node-rate-limiter-pro ships with two rate limiting algorithms. Both run in O(1) time and space per key.
 
 ## Sliding Window Counter
 

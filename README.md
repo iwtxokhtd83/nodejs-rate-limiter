@@ -1,14 +1,14 @@
 <div align="center">
 
-# nodejs-rate-limiter
+# node-rate-limiter-pro
 
 **High-performance rate limiter for Node.js**
 
 Token Bucket · Sliding Window · Redis · Distributed · Express Middleware
 
-[![npm version](https://img.shields.io/npm/v/nodejs-rate-limiter.svg)](https://www.npmjs.com/package/nodejs-rate-limiter)
-[![license](https://img.shields.io/npm/l/nodejs-rate-limiter.svg)](LICENSE)
-[![node](https://img.shields.io/node/v/nodejs-rate-limiter.svg)](package.json)
+[![npm version](https://img.shields.io/npm/v/node-rate-limiter-pro.svg)](https://www.npmjs.com/package/node-rate-limiter-pro)
+[![license](https://img.shields.io/npm/l/node-rate-limiter-pro.svg)](LICENSE)
+[![node](https://img.shields.io/node/v/node-rate-limiter-pro.svg)](package.json)
 
 </div>
 
@@ -27,19 +27,19 @@ Most rate limiters are either too slow, too simple, or don't support distributed
 ## Install
 
 ```bash
-npm install nodejs-rate-limiter
+npm install node-rate-limiter-pro
 ```
 
 For Redis support:
 
 ```bash
-npm install nodejs-rate-limiter ioredis
+npm install node-rate-limiter-pro ioredis
 ```
 
 ## Quick Start
 
 ```typescript
-import { RateLimiter } from 'nodejs-rate-limiter';
+import { RateLimiter } from 'node-rate-limiter-pro';
 
 const limiter = new RateLimiter({
   algorithm: 'sliding-window', // or 'token-bucket'
@@ -94,7 +94,7 @@ Share rate limits across multiple Node.js processes or servers. All operations a
 
 ```typescript
 import Redis from 'ioredis';
-import { RateLimiter } from 'nodejs-rate-limiter';
+import { RateLimiter } from 'node-rate-limiter-pro';
 
 const redis = new Redis();
 
@@ -115,7 +115,7 @@ Drop-in middleware for Express applications.
 
 ```typescript
 import express from 'express';
-import { RateLimiter } from 'nodejs-rate-limiter';
+import { RateLimiter } from 'node-rate-limiter-pro';
 
 const app = express();
 
@@ -221,12 +221,12 @@ Sliding Window (10x concurrent)        177,720          5         14
 ======================================================================
 Library                                        ops/sec   avg (μs)
 ----------------------------------------------------------------------
-nodejs-rate-limiter (sliding-window)         1,968,296          0
-nodejs-rate-limiter (token-bucket)           1,813,408          0
+node-rate-limiter-pro (sliding-window)         1,968,296          0
+node-rate-limiter-pro (token-bucket)           1,813,408          0
 express-rate-limit                             185,412          5
 ======================================================================
 
-🏆 nodejs-rate-limiter is ~10x faster than express-rate-limit
+🏆 node-rate-limiter-pro is ~10x faster than express-rate-limit
 ```
 
 > Run `npm run benchmark:compare` to reproduce.

@@ -1,6 +1,6 @@
 # Benchmarks
 
-Performance is a first-class concern for nodejs-rate-limiter. All benchmarks measure raw throughput of the rate limiting logic without HTTP overhead.
+Performance is a first-class concern for node-rate-limiter-pro. All benchmarks measure raw throughput of the rate limiting logic without HTTP overhead.
 
 ## Running Benchmarks
 
@@ -47,12 +47,12 @@ Sliding Window (10x concurrent)        177,720          5         14
 ======================================================================
 Library                                        ops/sec   avg (μs)
 ----------------------------------------------------------------------
-nodejs-rate-limiter (sliding-window)         1,968,296          0
-nodejs-rate-limiter (token-bucket)           1,813,408          0
+node-rate-limiter-pro (sliding-window)         1,968,296          0
+node-rate-limiter-pro (token-bucket)           1,813,408          0
 express-rate-limit                             185,412          5
 ======================================================================
 
-🏆 nodejs-rate-limiter is ~10x faster than express-rate-limit
+🏆 node-rate-limiter-pro is ~10x faster than express-rate-limit
 ```
 
 ## Why Is It Faster?

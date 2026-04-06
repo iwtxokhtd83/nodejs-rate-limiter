@@ -2,7 +2,7 @@
 
 ## Overview
 
-nodejs-rate-limiter follows a clean layered architecture that separates the public API, storage backends, and rate limiting algorithms.
+node-rate-limiter-pro follows a clean layered architecture that separates the public API, storage backends, and rate limiting algorithms.
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -131,7 +131,7 @@ src/
 Implement the `Store` interface to add a new backend:
 
 ```typescript
-import type { Store, RateLimitResult } from 'nodejs-rate-limiter';
+import type { Store, RateLimitResult } from 'node-rate-limiter-pro';
 
 class DynamoDBStore implements Store {
   async consume(key: string): Promise<RateLimitResult> {

@@ -139,7 +139,7 @@ app.use(limiter.middleware({
 Low-level in-memory store. Use this if you need direct store access.
 
 ```typescript
-import { MemoryStore } from 'nodejs-rate-limiter';
+import { MemoryStore } from 'node-rate-limiter-pro';
 
 const store = new MemoryStore({
   algorithm: 'sliding-window',
@@ -159,7 +159,7 @@ await store.close();
 Low-level Redis store. Use this if you need direct store access.
 
 ```typescript
-import { RedisStore } from 'nodejs-rate-limiter';
+import { RedisStore } from 'node-rate-limiter-pro';
 import Redis from 'ioredis';
 
 const store = new RedisStore({
@@ -202,5 +202,5 @@ import type {
   RedisStoreOptions,
   Store,
   Algorithm,
-} from 'nodejs-rate-limiter';
+} from 'node-rate-limiter-pro';
 ```

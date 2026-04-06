@@ -1,12 +1,12 @@
 # Redis & Distributed Mode
 
-nodejs-rate-limiter supports Redis as a backing store, enabling rate limiting across multiple Node.js processes, servers, or containers.
+node-rate-limiter-pro supports Redis as a backing store, enabling rate limiting across multiple Node.js processes, servers, or containers.
 
 ## Setup
 
 ```typescript
 import Redis from 'ioredis';
-import { RateLimiter } from 'nodejs-rate-limiter';
+import { RateLimiter } from 'node-rate-limiter-pro';
 
 const redis = new Redis({
   host: '127.0.0.1',
@@ -132,7 +132,7 @@ const limiter = new RateLimiter({
 
 ## Connection Lifecycle
 
-nodejs-rate-limiter does **not** manage the Redis connection lifecycle. You are responsible for:
+node-rate-limiter-pro does **not** manage the Redis connection lifecycle. You are responsible for:
 
 - Creating the Redis client
 - Handling connection errors

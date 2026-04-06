@@ -3,13 +3,13 @@
 ## Installation
 
 ```bash
-npm install nodejs-rate-limiter
+npm install node-rate-limiter-pro
 ```
 
 For Redis (distributed) support:
 
 ```bash
-npm install nodejs-rate-limiter ioredis
+npm install node-rate-limiter-pro ioredis
 ```
 
 ## Requirements
@@ -21,7 +21,7 @@ npm install nodejs-rate-limiter ioredis
 ## Basic Usage
 
 ```typescript
-import { RateLimiter } from 'nodejs-rate-limiter';
+import { RateLimiter } from 'node-rate-limiter-pro';
 
 // Create a limiter: 100 requests per 60 seconds
 const limiter = new RateLimiter({

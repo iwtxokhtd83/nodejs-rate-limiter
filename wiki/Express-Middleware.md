@@ -1,12 +1,12 @@
 # Express Middleware
 
-nodejs-rate-limiter includes a built-in Express/Connect-compatible middleware factory.
+node-rate-limiter-pro includes a built-in Express/Connect-compatible middleware factory.
 
 ## Basic Usage
 
 ```typescript
 import express from 'express';
-import { RateLimiter } from 'nodejs-rate-limiter';
+import { RateLimiter } from 'node-rate-limiter-pro';
 
 const app = express();
 
