@@ -44,5 +44,11 @@ export interface RateLimiterOptions {
 
 export interface RedisStoreOptions extends RateLimiterOptions {
   /** ioredis client instance */
-  client: any;
+  client: RedisLike;
+}
+
+/** Minimal interface for Redis-compatible clients (ioredis, etc.) */
+export interface RedisLike {
+  eval(...args: any[]): Promise<any>;
+  del(...keys: string[]): Promise<number>;
 }

@@ -17,6 +17,11 @@ interface WindowState {
   currStart: number;
 }
 
+/** How often to run eviction (every N consume calls) */
+const EVICTION_INTERVAL = 1000;
+/** Max keys to scan per eviction pass */
+const EVICTION_BATCH = 500;
+
 export class SlidingWindow {
   constructor(
     private maxRequests: number,
@@ -24,9 +29,17 @@ export class SlidingWindow {
   ) {}
 
   private windows = new Map<string, WindowState>();
+  private callCount = 0;
 
   consume(key: string): RateLimitResult {
     const now = Date.now();
+
+    // Lazy eviction: periodically sweep expired keys
+    if (++this.callCount >= EVICTION_INTERVAL) {
+      this.callCount = 0;
+      this.evict(now);
+    }
+
     let state = this.windows.get(key);
 
     if (!state) {
@@ -37,12 +50,10 @@ export class SlidingWindow {
     // Advance sub-windows if needed
     const elapsed = now - state.currStart;
     if (elapsed >= this.windowMs * 2) {
-      // Both windows expired
       state.prevCount = 0;
       state.currCount = 0;
       state.currStart = now;
     } else if (elapsed >= this.windowMs) {
-      // Current becomes previous
       state.prevCount = state.currCount;
       state.currCount = 0;
       state.currStart = state.currStart + this.windowMs;
@@ -67,7 +78,6 @@ export class SlidingWindow {
       };
     }
 
-    // Estimate when enough of the previous window will have expired
     const retryAfter = Math.max(0, Math.ceil(resetAt - now));
 
     return {
@@ -81,5 +91,17 @@ export class SlidingWindow {
 
   reset(key: string): void {
     this.windows.delete(key);
+  }
+
+  /** Remove keys whose both windows have fully expired */
+  private evict(now: number): void {
+    const expiry = this.windowMs * 2;
+    let scanned = 0;
+    for (const [key, state] of this.windows) {
+      if (scanned++ >= EVICTION_BATCH) break;
+      if (now - state.currStart >= expiry) {
+        this.windows.delete(key);
+      }
+    }
   }
 }

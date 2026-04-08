@@ -24,7 +24,7 @@ Extends `RateLimiterOptions` with:
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `client` | `Redis` | *required* | ioredis client instance |
+| `client` | `RedisLike` | *required* | ioredis client instance (or any object with `eval()` and `del()`) |
 | `prefix` | `string` | `'rl:'` | Key prefix for Redis keys |
 
 The store is automatically selected based on whether `client` is provided.
@@ -200,7 +200,19 @@ import type {
   RateLimitResult,
   RateLimiterOptions,
   RedisStoreOptions,
+  RedisLike,
   Store,
   Algorithm,
 } from 'node-rate-limiter-pro';
+```
+
+### `RedisLike`
+
+Minimal interface for Redis-compatible clients. You don't need to use ioredis specifically — any object matching this interface will work:
+
+```typescript
+interface RedisLike {
+  eval(...args: any[]): Promise<any>;
+  del(...keys: string[]): Promise<number>;
+}
 ```

@@ -175,5 +175,29 @@ describe('RateLimiter', () => {
       expect(statusCode).toBe(429);
       expect(responseBody.error).toBe('Too Many Requests');
     });
+
+    it('should forward errors to next() when consume throws', async () => {
+      const limiter = new RateLimiter({
+        algorithm: 'sliding-window',
+        limit: 10,
+        window: 1000,
+      });
+
+      // Monkey-patch consume to simulate a Redis failure
+      const error = new Error('Redis connection lost');
+      limiter.consume = async () => { throw error; };
+
+      const middleware = limiter.middleware();
+      const req = { ip: '127.0.0.1' } as any;
+      const res = {
+        setHeader: () => {},
+        status: () => res,
+        json: () => {},
+      } as any;
+
+      let nextError: any;
+      await middleware(req, res, (err: any) => { nextError = err; });
+      expect(nextError).toBe(error);
+    });
   });
 });

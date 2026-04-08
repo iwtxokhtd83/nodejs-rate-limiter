@@ -1,4 +1,4 @@
-import type { Store, RateLimitResult, RedisStoreOptions } from '../types';
+import type { Store, RateLimitResult, RedisStoreOptions, RedisLike } from '../types';
 
 // Sliding window Lua script — atomic operation
 const SLIDING_WINDOW_SCRIPT = `
@@ -13,8 +13,10 @@ redis.call('ZREMRANGEBYSCORE', key, '-inf', windowStart)
 local count = redis.call('ZCARD', key)
 
 if count < limit then
-  redis.call('ZADD', key, now, now .. '-' .. math.random(1000000))
+  local seq = redis.call('INCR', key .. ':seq')
+  redis.call('ZADD', key, now, now .. '-' .. seq)
   redis.call('PEXPIRE', key, window)
+  redis.call('PEXPIRE', key .. ':seq', window)
   return {1, limit - count - 1, 0}
 end
 
@@ -62,7 +64,7 @@ return {0, 0, retryAfter}
 `;
 
 export class RedisStore implements Store {
-  private client: any;
+  private client: RedisLike;
   private limit: number;
   private window: number;
   private prefix: string;

@@ -124,15 +124,15 @@ app.use(limiter.middleware());
 
 ## Error Handling
 
-If the rate limiter throws an error (e.g., Redis connection failure), the middleware will propagate it to Express's error handler. You should add a fallback:
+If the rate limiter throws an error (e.g., Redis connection failure), the middleware automatically forwards it to Express's error handler via `next(err)`. You can implement "fail open" or "fail closed" strategies:
 
 ```typescript
 app.use(limiter.middleware());
 
-// Error handler — fail open or fail closed, your choice
+// Error handler
 app.use((err, req, res, next) => {
   if (err.message.includes('Redis')) {
-    // Fail open: allow the request
+    // Fail open: allow the request through
     console.error('Rate limiter error:', err);
     return next();
   }

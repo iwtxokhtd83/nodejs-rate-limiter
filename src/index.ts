@@ -1,4 +1,4 @@
-import type { Store, RateLimitResult, RateLimiterOptions, RedisStoreOptions, Algorithm } from './types';
+import type { Store, RateLimitResult, RateLimiterOptions, RedisStoreOptions, RedisLike, Algorithm } from './types';
 import { MemoryStore } from './stores/memory-store';
 import { RedisStore } from './stores/redis-store';
 
@@ -47,32 +47,36 @@ export class RateLimiter {
     const onLimited = options?.onLimited;
 
     return async (req: any, res: any, next: any) => {
-      const key = keyFn(req);
-      const result = await this.consume(key);
+      try {
+        const key = keyFn(req);
+        const result = await this.consume(key);
 
-      res.setHeader('X-RateLimit-Limit', result.limit);
-      res.setHeader('X-RateLimit-Remaining', result.remaining);
-      res.setHeader('X-RateLimit-Reset', result.resetAt);
+        res.setHeader('X-RateLimit-Limit', result.limit);
+        res.setHeader('X-RateLimit-Remaining', result.remaining);
+        res.setHeader('X-RateLimit-Reset', result.resetAt);
 
-      if (!result.allowed) {
-        res.setHeader('Retry-After', Math.ceil(result.retryAfter / 1000));
-        if (onLimited) {
-          return onLimited(req, res);
+        if (!result.allowed) {
+          res.setHeader('Retry-After', Math.ceil(result.retryAfter / 1000));
+          if (onLimited) {
+            return onLimited(req, res);
+          }
+          res.status(429).json({
+            error: 'Too Many Requests',
+            retryAfter: result.retryAfter,
+          });
+          return;
         }
-        res.status(429).json({
-          error: 'Too Many Requests',
-          retryAfter: result.retryAfter,
-        });
-        return;
-      }
 
-      next();
+        next();
+      } catch (err) {
+        next(err);
+      }
     };
   }
 }
 
 // Re-export types
-export type { RateLimitResult, RateLimiterOptions, RedisStoreOptions, Store, Algorithm };
+export type { RateLimitResult, RateLimiterOptions, RedisStoreOptions, RedisLike, Store, Algorithm };
 
 // Named exports for stores (advanced usage)
 export { MemoryStore } from './stores/memory-store';

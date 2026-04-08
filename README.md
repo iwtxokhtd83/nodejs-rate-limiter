@@ -148,6 +148,8 @@ Response headers are set automatically:
 | `X-RateLimit-Reset` | Unix timestamp when limit resets |
 | `Retry-After` | Seconds until next request allowed (only on 429) |
 
+Errors from the rate limiter (e.g., Redis connection failures) are automatically forwarded to Express's error handler via `next(err)`, so you can implement fail-open or fail-closed strategies.
+
 ## API Reference
 
 ### `new RateLimiter(options)`
@@ -157,7 +159,7 @@ Response headers are set automatically:
 | `algorithm` | `'sliding-window' \| 'token-bucket'` | `'sliding-window'` | Rate limiting algorithm |
 | `limit` | `number` | *required* | Max requests per window |
 | `window` | `number` | *required* | Window size in milliseconds |
-| `client` | `Redis` | `undefined` | ioredis client (enables Redis mode) |
+| `client` | `RedisLike` | `undefined` | ioredis client or any object with `eval()` and `del()` (enables Redis mode) |
 | `prefix` | `string` | `'rl:'` | Redis key prefix |
 
 ### `limiter.consume(key): Promise<RateLimitResult>`

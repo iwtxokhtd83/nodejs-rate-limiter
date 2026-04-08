@@ -119,11 +119,12 @@ The memory store operates entirely in-process with no I/O. Redis requires a netw
 
 ### Does it leak memory?
 
-No. For the memory store:
-- **Sliding Window** — each key uses a fixed ~24 bytes (two counters + timestamp)
-- **Token Bucket** — each key uses a fixed ~16 bytes (token count + timestamp)
+No. Both algorithms include automatic key eviction that runs every 1,000 `consume()` calls:
 
-Keys are stored in a `Map`. If you have millions of unique keys, consider using Redis or implementing periodic cleanup.
+- **Sliding Window** — evicts keys whose both sub-windows have expired (idle > 2× window)
+- **Token Bucket** — evicts keys that have been idle long enough to fully refill (idle > 2× refill interval)
+
+Each eviction pass scans up to 500 keys to avoid blocking the event loop. For extremely high-cardinality workloads (millions of unique keys), consider using the Redis store instead.
 
 ---
 
