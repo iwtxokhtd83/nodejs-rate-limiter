@@ -31,7 +31,7 @@ export class SlidingWindow {
   private windows = new Map<string, WindowState>();
   private callCount = 0;
 
-  consume(key: string): RateLimitResult {
+  consume(key: string, cost: number = 1): RateLimitResult {
     const now = Date.now();
 
     // Lazy eviction: periodically sweep expired keys
@@ -65,13 +65,16 @@ export class SlidingWindow {
     const estimatedCount = state.prevCount * weight + state.currCount;
 
     const resetAt = state.currStart + this.windowMs;
+    const used = Math.floor(estimatedCount);
+    const remaining = Math.max(0, this.maxRequests - used);
 
-    if (estimatedCount < this.maxRequests) {
-      state.currCount++;
+    if (cost <= remaining) {
+      state.currCount += cost;
       const newEstimate = state.prevCount * weight + state.currCount;
+      const newUsed = Math.floor(newEstimate);
       return {
         allowed: true,
-        remaining: Math.max(0, Math.floor(this.maxRequests - newEstimate)),
+        remaining: Math.max(0, this.maxRequests - newUsed),
         limit: this.maxRequests,
         resetAt,
         retryAfter: 0,
@@ -82,7 +85,7 @@ export class SlidingWindow {
 
     return {
       allowed: false,
-      remaining: 0,
+      remaining,
       limit: this.maxRequests,
       resetAt,
       retryAfter,

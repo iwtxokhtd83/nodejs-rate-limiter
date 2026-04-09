@@ -56,6 +56,9 @@ if (result.allowed) {
   // Rate limited
   console.log(`Retry after ${result.retryAfter}ms`);
 }
+
+// Variable cost: consume multiple tokens at once
+const batchResult = await limiter.consume('user:123', 5);
 ```
 
 ## Algorithms
@@ -162,9 +165,9 @@ Errors from the rate limiter (e.g., Redis connection failures) are automatically
 | `client` | `RedisLike` | `undefined` | ioredis client or any object with `eval()` and `del()` (enables Redis mode) |
 | `prefix` | `string` | `'rl:'` | Redis key prefix |
 
-### `limiter.consume(key): Promise<RateLimitResult>`
+### `limiter.consume(key, cost?): Promise<RateLimitResult>`
 
-Attempt to consume one token/slot for the given key.
+Attempt to consume token(s) for the given key. The optional `cost` parameter (default: `1`) specifies how many tokens to consume.
 
 ```typescript
 interface RateLimitResult {
@@ -191,6 +194,7 @@ Returns Express-compatible middleware.
 | Option | Type | Description |
 |---|---|---|
 | `keyFn` | `(req) => string` | Custom key extraction (default: `req.ip`) |
+| `costFn` | `(req) => number` | Custom cost per request (default: `1`) |
 | `onLimited` | `(req, res) => void` | Custom 429 response handler |
 
 ## Benchmarks

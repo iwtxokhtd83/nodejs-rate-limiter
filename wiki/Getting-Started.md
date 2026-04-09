@@ -38,6 +38,9 @@ if (result.allowed) {
 } else {
   console.log(`Rate limited. Retry after ${result.retryAfter}ms`);
 }
+
+// Variable cost: consume multiple tokens at once
+const batchResult = await limiter.consume('user:123', 5);
 ```
 
 ## Choosing an Algorithm

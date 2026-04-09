@@ -6,18 +6,21 @@ local key = KEYS[1]
 local now = tonumber(ARGV[1])
 local window = tonumber(ARGV[2])
 local limit = tonumber(ARGV[3])
+local cost = tonumber(ARGV[4])
 
 local windowStart = now - window
 redis.call('ZREMRANGEBYSCORE', key, '-inf', windowStart)
 
 local count = redis.call('ZCARD', key)
 
-if count < limit then
-  local seq = redis.call('INCR', key .. ':seq')
-  redis.call('ZADD', key, now, now .. '-' .. seq)
+if count + cost <= limit then
+  for i = 1, cost do
+    local seq = redis.call('INCR', key .. ':seq')
+    redis.call('ZADD', key, now, now .. '-' .. seq)
+  end
   redis.call('PEXPIRE', key, window)
   redis.call('PEXPIRE', key .. ':seq', window)
-  return {1, limit - count - 1, 0}
+  return {1, limit - count - cost, 0}
 end
 
 local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
@@ -26,7 +29,7 @@ if #oldest >= 2 then
   retryAfter = tonumber(oldest[2]) + window - now
 end
 
-return {0, 0, retryAfter}
+return {0, limit - count, retryAfter}
 `;
 
 // Token bucket Lua script — atomic operation
@@ -35,6 +38,7 @@ local key = KEYS[1]
 local now = tonumber(ARGV[1])
 local maxTokens = tonumber(ARGV[2])
 local refillInterval = tonumber(ARGV[3])
+local cost = tonumber(ARGV[4])
 
 local data = redis.call('HMGET', key, 'tokens', 'lastRefill')
 local tokens = tonumber(data[1])
@@ -50,17 +54,17 @@ local tokensToAdd = (elapsed / refillInterval) * maxTokens
 tokens = math.min(maxTokens, tokens + tokensToAdd)
 lastRefill = now
 
-if tokens >= 1 then
-  tokens = tokens - 1
+if tokens >= cost then
+  tokens = tokens - cost
   redis.call('HMSET', key, 'tokens', tokens, 'lastRefill', lastRefill)
   redis.call('PEXPIRE', key, refillInterval)
   return {1, math.floor(tokens), 0}
 end
 
-local retryAfter = math.ceil(((1 - tokens) / maxTokens) * refillInterval)
+local retryAfter = math.ceil(((cost - tokens) / maxTokens) * refillInterval)
 redis.call('HMSET', key, 'tokens', tokens, 'lastRefill', lastRefill)
 redis.call('PEXPIRE', key, refillInterval)
-return {0, 0, retryAfter}
+return {0, math.floor(tokens), retryAfter}
 `;
 
 export class RedisStore implements Store {
@@ -78,7 +82,7 @@ export class RedisStore implements Store {
     this.algorithm = options.algorithm ?? 'sliding-window';
   }
 
-  async consume(key: string): Promise<RateLimitResult> {
+  async consume(key: string, cost: number = 1): Promise<RateLimitResult> {
     const fullKey = this.prefix + key;
     const now = Date.now();
 
@@ -92,6 +96,7 @@ export class RedisStore implements Store {
         now,
         this.window,
         this.limit,
+        cost,
       );
     } else {
       result = await this.client.eval(
@@ -101,6 +106,7 @@ export class RedisStore implements Store {
         now,
         this.limit,
         this.window,
+        cost,
       );
     }
 

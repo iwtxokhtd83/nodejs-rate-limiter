@@ -37,6 +37,22 @@ The middleware automatically sets standard rate limit headers on every response:
 | `X-RateLimit-Reset` | Unix timestamp (ms) when the window resets | `1704067200000` |
 | `Retry-After` | Seconds until next request is allowed (429 only) | `30` |
 
+## Custom Cost Function
+
+By default, each request costs 1 token. Use `costFn` to assign variable costs:
+
+```typescript
+// Batch API: cost = number of items
+app.use(limiter.middleware({
+  costFn: (req) => req.body?.items?.length || 1,
+}));
+
+// File upload: cost = file size in MB
+app.use('/upload', limiter.middleware({
+  costFn: (req) => Math.ceil((req.headers['content-length'] || 1) / 1_000_000),
+}));
+```
+
 ## Custom Key Function
 
 By default, the middleware uses `req.ip` as the rate limit key. You can customize this:

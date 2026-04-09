@@ -126,6 +126,105 @@ describe('RateLimiter', () => {
     });
   });
 
+  describe('Variable cost — consume(key, cost)', () => {
+    describe('Sliding Window', () => {
+      it('should consume multiple tokens at once', async () => {
+        const limiter = new RateLimiter({
+          algorithm: 'sliding-window',
+          limit: 10,
+          window: 1000,
+        });
+        const r = await limiter.consume('user:1', 3);
+        expect(r.allowed).toBe(true);
+        expect(r.remaining).toBe(7);
+      });
+
+      it('should block when cost exceeds remaining', async () => {
+        const limiter = new RateLimiter({
+          algorithm: 'sliding-window',
+          limit: 5,
+          window: 1000,
+        });
+        await limiter.consume('user:1', 3);
+        const r = await limiter.consume('user:1', 3);
+        expect(r.allowed).toBe(false);
+        expect(r.remaining).toBe(2);
+      });
+
+      it('should allow cost=1 after partial consumption', async () => {
+        const limiter = new RateLimiter({
+          algorithm: 'sliding-window',
+          limit: 5,
+          window: 1000,
+        });
+        await limiter.consume('user:1', 4);
+        const r = await limiter.consume('user:1', 1);
+        expect(r.allowed).toBe(true);
+        expect(r.remaining).toBe(0);
+      });
+
+      it('should block when cost exceeds total limit', async () => {
+        const limiter = new RateLimiter({
+          algorithm: 'sliding-window',
+          limit: 3,
+          window: 1000,
+        });
+        const r = await limiter.consume('user:1', 5);
+        expect(r.allowed).toBe(false);
+      });
+    });
+
+    describe('Token Bucket', () => {
+      it('should consume multiple tokens at once', async () => {
+        const limiter = new RateLimiter({
+          algorithm: 'token-bucket',
+          limit: 10,
+          window: 1000,
+        });
+        const r = await limiter.consume('user:1', 4);
+        expect(r.allowed).toBe(true);
+        expect(r.remaining).toBe(6);
+      });
+
+      it('should block when cost exceeds available tokens', async () => {
+        const limiter = new RateLimiter({
+          algorithm: 'token-bucket',
+          limit: 5,
+          window: 1000,
+        });
+        await limiter.consume('user:1', 3);
+        const r = await limiter.consume('user:1', 3);
+        expect(r.allowed).toBe(false);
+        expect(r.remaining).toBe(2);
+        expect(r.retryAfter).toBeGreaterThan(0);
+      });
+
+      it('should return correct retryAfter for high cost', async () => {
+        const limiter = new RateLimiter({
+          algorithm: 'token-bucket',
+          limit: 10,
+          window: 10000,
+        });
+        await limiter.consume('user:1', 8);
+        const r = await limiter.consume('user:1', 5);
+        expect(r.allowed).toBe(false);
+        // Need 3 more tokens, refill rate is 10 per 10s = 1 per 1s
+        expect(r.retryAfter).toBeGreaterThan(0);
+      });
+
+      it('should default to cost=1', async () => {
+        const limiter = new RateLimiter({
+          algorithm: 'token-bucket',
+          limit: 10,
+          window: 1000,
+        });
+        const r = await limiter.consume('user:1');
+        expect(r.allowed).toBe(true);
+        expect(r.remaining).toBe(9);
+      });
+    });
+  });
+
   describe('Express middleware', () => {
     it('should call next() when allowed', async () => {
       const limiter = new RateLimiter({

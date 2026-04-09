@@ -13,10 +13,12 @@ export interface RateLimitResult {
 
 export interface Store {
   /**
-   * Attempt to consume a token for the given key.
+   * Attempt to consume token(s) for the given key.
+   * @param key - Rate limit key
+   * @param cost - Number of tokens to consume (default: 1)
    * Returns the rate limit result.
    */
-  consume(key: string): Promise<RateLimitResult>;
+  consume(key: string, cost?: number): Promise<RateLimitResult>;
 
   /**
    * Reset the rate limit state for a key.

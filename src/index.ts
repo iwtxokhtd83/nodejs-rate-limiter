@@ -14,11 +14,13 @@ export class RateLimiter {
   }
 
   /**
-   * Attempt to consume a token for the given key.
+   * Attempt to consume token(s) for the given key.
+   * @param key - Rate limit key (e.g., user ID, IP address)
+   * @param cost - Number of tokens to consume (default: 1)
    * Returns rate limit metadata including whether the request is allowed.
    */
-  async consume(key: string): Promise<RateLimitResult> {
-    return this.store.consume(key);
+  async consume(key: string, cost: number = 1): Promise<RateLimitResult> {
+    return this.store.consume(key, cost);
   }
 
   /**
@@ -41,15 +43,18 @@ export class RateLimiter {
    */
   middleware(options?: {
     keyFn?: (req: any) => string;
+    costFn?: (req: any) => number;
     onLimited?: (req: any, res: any) => void;
   }) {
     const keyFn = options?.keyFn ?? ((req: any) => req.ip ?? req.socket?.remoteAddress ?? 'unknown');
+    const costFn = options?.costFn;
     const onLimited = options?.onLimited;
 
     return async (req: any, res: any, next: any) => {
       try {
         const key = keyFn(req);
-        const result = await this.consume(key);
+        const cost = costFn ? costFn(req) : 1;
+        const result = await this.consume(key, cost);
 
         res.setHeader('X-RateLimit-Limit', result.limit);
         res.setHeader('X-RateLimit-Remaining', result.remaining);

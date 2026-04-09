@@ -19,7 +19,7 @@ export class TokenBucket {
     private refillIntervalMs: number,
   ) {}
 
-  consume(key: string): RateLimitResult {
+  consume(key: string, cost: number = 1): RateLimitResult {
     const now = Date.now();
 
     // Lazy eviction: periodically sweep stale keys
@@ -43,8 +43,8 @@ export class TokenBucket {
 
     const resetAt = now + this.refillIntervalMs;
 
-    if (bucket.tokens >= 1) {
-      bucket.tokens -= 1;
+    if (bucket.tokens >= cost) {
+      bucket.tokens -= cost;
       return {
         allowed: true,
         remaining: Math.floor(bucket.tokens),
@@ -54,14 +54,14 @@ export class TokenBucket {
       };
     }
 
-    // Calculate when next token will be available
+    // Calculate when enough tokens will be available
     const retryAfter = Math.ceil(
-      ((1 - bucket.tokens) / this.maxTokens) * this.refillIntervalMs,
+      ((cost - bucket.tokens) / this.maxTokens) * this.refillIntervalMs,
     );
 
     return {
       allowed: false,
-      remaining: 0,
+      remaining: Math.floor(bucket.tokens),
       limit: this.maxTokens,
       resetAt,
       retryAfter,

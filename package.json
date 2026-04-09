@@ -1,6 +1,6 @@
 {
   "name": "node-rate-limiter-pro",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "High-performance rate limiter for Node.js with Token Bucket, Sliding Window, Redis support, and distributed rate limiting",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

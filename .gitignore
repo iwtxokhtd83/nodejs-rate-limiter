@@ -4,3 +4,5 @@ coverage/
 *.log
 .env
 .DS_Store
+blog/
+_*.mjs

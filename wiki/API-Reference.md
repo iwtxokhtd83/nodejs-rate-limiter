@@ -31,16 +31,17 @@ The store is automatically selected based on whether `client` is provided.
 
 ---
 
-### `limiter.consume(key)`
+### `limiter.consume(key, cost?)`
 
 ```typescript
-consume(key: string): Promise<RateLimitResult>
+consume(key: string, cost?: number): Promise<RateLimitResult>
 ```
 
-Attempt to consume one token/slot for the given key.
+Attempt to consume token(s) for the given key.
 
 **Parameters:**
 - `key` — A string identifying the rate limit subject (e.g., user ID, IP address)
+- `cost` — Number of tokens to consume (default: `1`)
 
 **Returns:** `Promise<RateLimitResult>`
 
@@ -75,6 +76,9 @@ if (result.allowed) {
   // Reject the request
   console.log(`Try again in ${result.retryAfter}ms`);
 }
+
+// Variable cost: consume 5 tokens at once (e.g., batch request)
+const batchResult = await limiter.consume('user:123', 5);
 ```
 
 ---
@@ -119,6 +123,7 @@ Returns an Express/Connect-compatible middleware function.
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `keyFn` | `(req) => string` | `req.ip` | Function to extract the rate limit key from the request |
+| `costFn` | `(req) => number` | `1` | Function to determine the cost per request |
 | `onLimited` | `(req, res) => void` | Built-in 429 JSON response | Custom handler when rate limit is exceeded |
 
 **Example:**
@@ -183,7 +188,7 @@ Both `MemoryStore` and `RedisStore` implement this interface. You can create cus
 
 ```typescript
 interface Store {
-  consume(key: string): Promise<RateLimitResult>;
+  consume(key: string, cost?: number): Promise<RateLimitResult>;
   reset(key: string): Promise<void>;
   close(): Promise<void>;
 }

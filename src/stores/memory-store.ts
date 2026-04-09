@@ -14,8 +14,8 @@ export class MemoryStore implements Store {
     }
   }
 
-  async consume(key: string): Promise<RateLimitResult> {
-    return this.algorithm.consume(key);
+  async consume(key: string, cost: number = 1): Promise<RateLimitResult> {
+    return this.algorithm.consume(key, cost);
   }
 
   async reset(key: string): Promise<void> {
